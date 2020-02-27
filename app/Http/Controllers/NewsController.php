@@ -39,8 +39,8 @@ class NewsController extends Controller
         if($check->action_create==0){
             return response()->json([
                 'success'=>true,
-                'message'=>'get data success',
-                'data'=>'Permision deny'
+                'message'=>'Permision deny',
+                'data'=>''
             ],201);
         }else{
             $news=News::create([
@@ -112,8 +112,8 @@ class NewsController extends Controller
         if($check->action_create==0){
             return response()->json([
                 'success'=>true,
-                'message'=>'get data success',
-                'data'=>'Permision deny'
+                'message'=>'Permision deny',
+                'data'=>''
             ],201);
         }else{
             $news=News::find($id);
@@ -133,6 +133,51 @@ class NewsController extends Controller
                     'success'=>false,
                     'message'=>'Update fail!',
                     'data'=>''
+                ],400);
+                }
+                
+            }else{
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'Data Not found!',
+                    'data'=>''
+                ],400);
+            }
+        }
+    }
+
+    public function delete(Request $request){
+        // $this->validate($request,$this->News);
+        $id=$request->input('id');
+        $apiToken=explode(' ', $request->header('Authorization'));
+        $check = DB::table('users')
+            ->leftjoin('tbl_user_role', 'users.id', '=', 'tbl_user_role.id_user')
+            ->leftjoin('tbl_role', 'tbl_user_role.id_role', '=', 'tbl_role.id')
+            ->leftjoin('tbl_role_menu', 'tbl_role.id', '=', 'tbl_role_menu.id_role')
+            ->select('users.username', 'tbl_role.nama_role', 'tbl_role_menu.action_create','tbl_role_menu.action_read','tbl_role_menu.action_update','tbl_role_menu.action_delete')
+            ->where('users.api_token', $apiToken[1])
+            ->get()->first();
+        if($check->action_create==0){
+            return response()->json([
+                'success'=>true,
+                'message'=>'get data success',
+                'data'=>'Permision deny'
+            ],201);
+        }else{
+            $news=News::find($id);
+            if($news){
+                $check=$news->delete();
+                if($check){
+                    return response()->json([
+                        'success'=>true,
+                        'message'=>'Delete success',
+                        'data'=>'1'
+                    ],201);
+                }else{
+                    return response()->json([
+                    'success'=>false,
+                    'message'=>'Delete fail!',
+                    'data'=>'0'
                 ],400);
                 }
                 
